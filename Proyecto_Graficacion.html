@@ -1,0 +1,128 @@
+<!DOCTYPE html> 
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="autor" content="Roshely Molina" />
+    <title>Animación</title>
+    <style>
+        body {
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+      
+
+        canvas {
+            display: block;
+        }
+
+        .controles {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+        }
+
+        button, input[type="color"] {
+            margin: 5px;
+            padding: 10px;
+            font-size: 16px;
+        }
+        label {
+            color: #f3f3f3;
+        }
+    
+    </style>
+</head>
+<body>
+<!--<h1 class="titulo">ANIMACION :3 </h1> --> 
+    <div class="controles">
+        <button id="aumentarTamano">Aumentar Tamaño</button>
+        <button id="disminuirTamano">Disminuir Tamaño</button>
+        <label class="label" for="selectorColor"> cambio de color -></label>
+        <input type="color" id="selectorColor" value="#00ff00">
+        <button id="aumentarVelocidad">Aumentar Velocidad</button>
+        <button id="disminuirVelocidad">Disminuir Velocidad</button>
+        <button id="cambiarFigura">Cambiar Figura</button>
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script>
+        const escena = new THREE.Scene();
+        const camara = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderizador = new THREE.WebGLRenderer();
+        renderizador.setSize(window.innerWidth, window.innerHeight);
+        document.body.appendChild(renderizador.domElement);
+
+        let geometria = new THREE.BoxGeometry();
+        let material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
+        let figura = new THREE.Mesh(geometria, material);
+        escena.add(figura);
+
+        camara.position.z = 5;
+
+        let escala = 1;
+        let direccionEscala = 1;
+        let velocidadAnimacion = 0.01;
+
+        function animar() {
+            requestAnimationFrame(animar);
+
+            escala += direccionEscala * velocidadAnimacion;
+            if (escala > 2 || escala < 1) {
+                direccionEscala *= -1; 
+            }
+            figura.scale.set(escala, escala, escala);
+            figura.rotation.x += 0.01;
+            figura.rotation.y += 0.01;
+
+            renderizador.render(escena, camara);
+        }
+
+        animar();
+
+        window.addEventListener('resize', () => {
+            camara.aspect = window.innerWidth / window.innerHeight;
+            camara.updateProjectionMatrix();
+            renderizador.setSize(window.innerWidth, window.innerHeight);
+        });
+
+        document.getElementById('aumentarTamano').addEventListener('click', () => {
+            escala += 0.1; 
+        });
+
+        document.getElementById('disminuirTamano').addEventListener('click', () => {
+            escala = Math.max(0.1, escala - 0.1); 
+        });
+
+        document.getElementById('selectorColor').addEventListener('input', (evento) => {
+            const colorSeleccionado = evento.target.value;
+            figura.material.color.set(colorSeleccionado); 
+        });
+
+        document.getElementById('aumentarVelocidad').addEventListener('click', () => {
+            velocidadAnimacion += 0.02; 
+        });
+
+        document.getElementById('disminuirVelocidad').addEventListener('click', () => {
+            velocidadAnimacion = Math.max(0.01, velocidadAnimacion - 0.01); 
+        });
+
+        document.getElementById('cambiarFigura').addEventListener('click', () => {
+            escena.remove(figura);
+
+            let figuras = [
+                new THREE.BoxGeometry(),
+                new THREE.ConeGeometry(1, 2, 60),
+                new THREE.CylinderGeometry(1, 1, 2, 60), 
+                new THREE.TorusGeometry(1, 0.4, 16, 100) 
+            ];
+
+            let indiceAleatorio = Math.floor(Math.random() * figuras.length);
+            geometria = figuras[indiceAleatorio];
+            figura = new THREE.Mesh(geometria, material);
+            escena.add(figura);
+        });
+    </script>
+</body>
+</html>
